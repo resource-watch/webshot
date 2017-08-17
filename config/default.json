@@ -1,0 +1,12 @@
+{
+     "logger": {
+        "name": "webshot-service-DEV",
+        "level": "debug",
+        "toFile": false,
+        "dirLogFile": null
+    },
+    "service": {
+        "name": "Webshot service",
+        "port": 5000
+    }
+}

@@ -1,0 +1,9 @@
+base:
+  build: .
+  ports:
+    - "5000:5000"
+  container_name: webshot-service
+  environment:
+    PORT: 5000
+    NODE_PATH: app/src
+
