@@ -9,7 +9,7 @@ const router = new Router({
   prefix: '/webshot',
 });
 
-const viewportOptions = { width: 1024, height: 768, isLandscape: true };
+const viewportOptions = { width: 1024, height: 768 };
 const gotoOptions = { waitUntil: 'networkidle' };
 
 const getDelayParam = (param) => {
@@ -41,6 +41,8 @@ class WebshotRouter {
     const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
     const filePath = `${tmpDir.name}/${filename}`;
     const delay = getDelayParam(ctx.query.waitFor);
+
+    if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
 
     try {
       logger.debug(`Saving in: ${filePath}`);
