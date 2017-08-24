@@ -38,12 +38,12 @@ class WebshotRouter {
     logger.info(`Doing screenshot of ${ctx.query.url}`);
 
     const tmpDir = tmp.dirSync();
-    const filename = `${ctx.query.name}-${Date.now()}.pdf`;
-    const filePath = `${tmpDir.name}/${filename}.pdf`;
+    const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
+    const filePath = `${tmpDir.name}/${filename}`;
     const delay = getDelayParam(ctx.query.waitFor);
 
     try {
-      logger.debug(`Saving in: ${tmpDir.name}/${ctx.query.name}.pdf `);
+      logger.debug(`Saving in: ${filePath}`);
 
       // Using Puppeteer
       const browser = await puppeteer.launch();
@@ -56,7 +56,7 @@ class WebshotRouter {
       browser.close();
 
       // Sending file to download
-      ctx.set('Content-disposition', `attachment; filename=${filename}.pdf`);
+      ctx.set('Content-disposition', `attachment; filename=${filename}`);
       ctx.set('Content-type', 'application/pdf');
       await send(ctx, filePath, { root: '/' });
     } catch (err) {
