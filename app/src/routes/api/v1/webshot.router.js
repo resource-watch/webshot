@@ -48,7 +48,7 @@ class WebshotRouter {
       logger.debug(`Saving in: ${filePath}`);
 
       // Using Puppeteer
-      const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
       const page = await browser.newPage();
       await page.setViewport(viewportOptions);
       await page.goto(ctx.query.url, gotoOptions);
@@ -63,12 +63,13 @@ class WebshotRouter {
       await send(ctx, filePath, { root: '/' });
     } catch (err) {
       logger.error(err);
-    } finally {
-      logger.debug('Removing folder ');
-      if (tmpDir) {
-        // WebshotRouter.removeFolder(tmpDir.name);
-      }
     }
+    // finally {
+    //   logger.debug('Removing folder ');
+    //   if (tmpDir) {
+    //     WebshotRouter.removeFolder(tmpDir.name);
+    //   }
+    // }
   }
 
 }
