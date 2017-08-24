@@ -66,7 +66,7 @@ class WebshotRouter {
     } finally {
       logger.debug('Removing folder ');
       if (tmpDir) {
-        WebshotRouter.removeFolder(tmpDir.name);
+        // WebshotRouter.removeFolder(tmpDir.name);
       }
     }
   }
