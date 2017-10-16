@@ -1,5 +1,5 @@
 const Router = require('koa-router');
-const RenderPDF = require('chrome-headless-render-pdf');
+const puppeteer = require('puppeteer');
 const logger = require('logger');
 const send = require('koa-send');
 const tmp = require('tmp');
@@ -8,6 +8,15 @@ const rimraf = require('rimraf');
 const router = new Router({
   prefix: '/webshot',
 });
+
+const viewportOptions = { width: 1024, height: 768 };
+const gotoOptions = { waitUntil: 'networkidle' };
+
+const getDelayParam = (param) => {
+  const n = parseInt(param, 10);
+  if (typeof n === 'number' && !isNaN(n)) return n;
+  return param;
+};
 
 class WebshotRouter {
 
@@ -25,25 +34,42 @@ class WebshotRouter {
 
   static async screenshot(ctx) {
     ctx.assert(ctx.query.url, 400, 'Url param is required');
-    ctx.assert(ctx.query.name, 400, 'Name param required');
+    ctx.assert(ctx.query.filename, 400, 'Name param required');
     logger.info(`Doing screenshot of ${ctx.query.url}`);
-    const tmpDir = tmp.dirSync();
-    try {
-      logger.debug(`Saving in: ${tmpDir.name}/${ctx.query.name}.pdf `);
-      await RenderPDF.generateSinglePdf(ctx.query.url, `${tmpDir.name}/${ctx.query.name}.pdf`);
-      ctx.set('Content-disposition', `attachment; filename=${ctx.query.name}.pdf`);
-      ctx.set('Content-type', 'application/pdf');
-      await send(ctx, `${tmpDir.name}/${ctx.query.name}.pdf`, { root: '/' });
 
+    const tmpDir = tmp.dirSync();
+    const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
+    const filePath = `${tmpDir.name}/${filename}`;
+    const delay = getDelayParam(ctx.query.waitFor);
+
+    if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
+
+    try {
+      logger.debug(`Saving in: ${filePath}`);
+
+      // Using Puppeteer
+      const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+      const page = await browser.newPage();
+      await page.setViewport(viewportOptions);
+      await page.goto(ctx.query.url, gotoOptions);
+      if (delay) await page.waitFor(delay);
+      await page.pdf({ path: filePath, format: 'A4' });
+
+      browser.close();
+
+      // Sending file to download
+      ctx.set('Content-disposition', `attachment; filename=${filename}`);
+      ctx.set('Content-type', 'application/pdf');
+      await send(ctx, filePath, { root: '/' });
     } catch (err) {
       logger.error(err);
-    } finally {
-      logger.debug('Removing folder ');
-      if (tmpDir) {
-        // WebshotRouter.removeFolder(tmpDir.name);
-      }
     }
-
+    // finally {
+    //   logger.debug('Removing folder ');
+    //   if (tmpDir) {
+    //     WebshotRouter.removeFolder(tmpDir.name);
+    //   }
+    // }
   }
 
 }
