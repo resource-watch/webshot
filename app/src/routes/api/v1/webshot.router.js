@@ -3,13 +3,14 @@ const puppeteer = require('puppeteer');
 const logger = require('logger');
 const send = require('koa-send');
 const tmp = require('tmp');
+const url = require('url');
 const rimraf = require('rimraf');
 
 const router = new Router({
   prefix: '/webshot',
 });
 
-const viewportOptions = { width: 1024, height: 768 };
+const viewportDefaultOptions = { width: 1024, height: 768 };
 const gotoOptions = { waitUntil: 'networkidle' };
 
 const getDelayParam = (param) => {
@@ -33,16 +34,26 @@ class WebshotRouter {
   }
 
   static async screenshot(ctx) {
-    ctx.assert(ctx.query.url, 400, 'Url param is required');
-    ctx.assert(ctx.query.filename, 400, 'Name param required');
+    ctx.assert(ctx.query.url, 400, 'url param is required');
+    ctx.assert(ctx.query.filename, 400, 'filename param required');
     logger.info(`Doing screenshot of ${ctx.query.url}`);
 
+    // Validating URL
+    const urlObject = url.parse(ctx.query.url);
+    if (!/http|https/.test(urlObject.protocol)) {
+      ctx.assert(ctx.query.url, 400, 'The protocol in url param is not valid. Use http or https.');
+    }
+
+    const viewportOptions = Object.assign({}, viewportDefaultOptions);
     const tmpDir = tmp.dirSync();
     const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
     const filePath = `${tmpDir.name}/${filename}`;
     const delay = getDelayParam(ctx.query.waitFor);
 
     if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
+
+    if (ctx.query.width) viewportOptions.width = ctx.query.width;
+    if (ctx.query.height) viewportOptions.height = ctx.query.height;
 
     try {
       logger.debug(`Saving in: ${filePath}`);
@@ -51,6 +62,7 @@ class WebshotRouter {
       const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
       const page = await browser.newPage();
       await page.setViewport(viewportOptions);
+      if (ctx.query.mediatype) page.emulateMedia(ctx.query.mediatype);
       await page.goto(ctx.query.url, gotoOptions);
       if (delay) await page.waitFor(delay);
       await page.pdf({ path: filePath, format: 'A4' });
@@ -64,12 +76,6 @@ class WebshotRouter {
     } catch (err) {
       logger.error(err);
     }
-    // finally {
-    //   logger.debug('Removing folder ');
-    //   if (tmpDir) {
-    //     WebshotRouter.removeFolder(tmpDir.name);
-    //   }
-    // }
   }
 
 }
