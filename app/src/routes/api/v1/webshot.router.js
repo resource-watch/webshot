@@ -10,7 +10,7 @@ const router = new Router({
   prefix: '/webshot',
 });
 
-const viewportDefaultOptions = { width: 1024, height: 768 };
+const viewportDefaultOptions = { width: 1024, height: 768, isMobile: true };
 const gotoOptions = { waitUntil: 'networkidle' };
 
 const getDelayParam = (param) => {
@@ -40,9 +40,7 @@ class WebshotRouter {
 
     // Validating URL
     const urlObject = url.parse(ctx.query.url);
-    if (!/http|https/.test(urlObject.protocol)) {
-      ctx.assert(ctx.query.url, 400, 'The protocol in url param is not valid. Use http or https.');
-    }
+    ctx.assert(/http|https/.test(urlObject.protocol), 400, 'The protocol in url param is not valid. Use http or https.');
 
     const viewportOptions = Object.assign({}, viewportDefaultOptions);
     const tmpDir = tmp.dirSync();
@@ -61,10 +59,10 @@ class WebshotRouter {
       const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
       const page = await browser.newPage();
       await page.setViewport(viewportOptions);
-      // if (ctx.query.mediatype) await page.emulateMedia(ctx.query.mediatype);
       await page.goto(ctx.query.url, gotoOptions);
       if (delay) await page.waitFor(delay);
-      await page.pdf({ path: filePath, format: 'A4', width: viewportOptions.width });
+      if (ctx.query.mediatype) await page.emulateMedia(ctx.query.mediatype);
+      await page.pdf({ path: filePath, format: 'A4' });
 
       browser.close();
 
