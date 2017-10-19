@@ -51,7 +51,6 @@ class WebshotRouter {
     const delay = getDelayParam(ctx.query.waitFor);
 
     if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
-
     if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width);
     if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height);
 
@@ -62,10 +61,10 @@ class WebshotRouter {
       const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
       const page = await browser.newPage();
       await page.setViewport(viewportOptions);
-      if (ctx.query.mediatype) page.emulateMedia(ctx.query.mediatype);
+      // if (ctx.query.mediatype) await page.emulateMedia(ctx.query.mediatype);
       await page.goto(ctx.query.url, gotoOptions);
       if (delay) await page.waitFor(delay);
-      await page.pdf({ path: filePath, format: 'A4' });
+      await page.pdf({ path: filePath, format: 'A4', width: viewportOptions.width });
 
       browser.close();
 
