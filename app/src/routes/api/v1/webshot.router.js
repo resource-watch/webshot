@@ -52,8 +52,8 @@ class WebshotRouter {
 
     if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
 
-    if (ctx.query.width) viewportOptions.width = ctx.query.width;
-    if (ctx.query.height) viewportOptions.height = ctx.query.height;
+    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width);
+    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height);
 
     try {
       logger.debug(`Saving in: ${filePath}`);
