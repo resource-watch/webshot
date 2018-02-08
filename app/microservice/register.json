@@ -1,12 +1,14 @@
 {
-	"name": "webshot-service",
-	"endpoints": [{
-		"path": "/v1/webshot/pdf",
-		"method": "GET",
-		"binary": true,
-		"redirect": {
-			"method": "GET",
-			"path": "/api/v1/webshot"
-		}
-	}]
+  "name": "webshot-service",
+  "endpoints": [
+    {
+      "path": "/v1/webshot/pdf",
+      "method": "GET",
+      "binary": true,
+      "redirect": {
+        "method": "GET",
+        "path": "/api/v1/webshot"
+      }
+    }
+  ]
 }

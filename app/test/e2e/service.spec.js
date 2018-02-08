@@ -6,17 +6,17 @@ require('should');
 
 describe('E2E test', () => {
 
-    before(() => {
+  before(() => {
 
-        // simulating gateway communications
-        nock(`${process.env.CT_URL}/v1`)
-            .post('/', () => true)
-            .reply(200, {
-                status: 200,
-                detail: 'Ok'
-            });
-    });
+    // simulating gateway communications
+    nock(`${process.env.CT_URL}/v1`)
+      .post('/', () => true)
+      .reply(200, {
+        status: 200,
+        detail: 'Ok'
+      });
+  });
 
-    after(() => {
-    });
+  after(() => {
+  });
 });
