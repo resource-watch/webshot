@@ -49,8 +49,8 @@ class WebshotRouter {
     const delay = getDelayParam(ctx.query.waitFor);
 
     if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
-    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width);
-    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height);
+    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
+    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
 
     try {
       logger.debug(`Saving in: ${filePath}`);
