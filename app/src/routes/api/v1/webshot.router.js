@@ -62,7 +62,11 @@ class WebshotRouter {
       await page.goto(ctx.query.url, gotoOptions);
       if (delay) await page.waitFor(delay);
       if (ctx.query.mediatype) await page.emulateMedia(ctx.query.mediatype);
-      await page.pdf({ path: filePath, format: 'A4' });
+
+      // Whether or not to include the background
+      const printBackground = !!(ctx.query.backgrounds && ctx.query.backgrounds === 'true');
+
+      await page.pdf({ path: filePath, format: 'A4', printBackground });
 
       browser.close();
 
