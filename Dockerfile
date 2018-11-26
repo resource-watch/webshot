@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
 	apt-transport-https \
 	ca-certificates \
 	curl \
+	libgconf-2-4 \
   gnupg \
   bash \
   build-essential \

@@ -9,6 +9,15 @@
         "method": "GET",
         "path": "/api/v1/webshot"
       }
+    },
+    {
+      "path": "/v1/webshot/widget/:widget/thumbnail",
+      "method": "POST",
+      "binary": true,
+      "redirect": {
+        "method": "POST",
+        "path": "/api/v1/webshot/widget/:widget/thumbnail"
+      }
     }
   ]
 }
