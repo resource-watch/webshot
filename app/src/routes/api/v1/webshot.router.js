@@ -93,9 +93,10 @@ class WebshotRouter {
     const delay = 10000;
     const renderUrl = `${config.get('service.appUrl')}${widget}`;
 
-    // if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
-    // if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
-    // if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
+    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
+    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
+
+    logger.info(`Capturing URL: ${renderUrl}`);
 
     try {
       logger.debug(`Saving in: ${filePath}`);
