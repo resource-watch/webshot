@@ -117,6 +117,7 @@ class WebshotRouter {
       ctx.body = { data: { widgetThumbnail: s3file } };
     } catch (err) {
       logger.error(err);
+      throw err;
     }
   }
 
