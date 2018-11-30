@@ -1,5 +1,6 @@
 {
     "service": {
-        "port": "PORT"
+        "port": "PORT",
+        "appUrl": "WIDGET_RENDER_URL"
     }
 }

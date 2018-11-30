@@ -90,7 +90,7 @@ class WebshotRouter {
     const tmpDir = tmp.dirSync();
     const filename = `${widget}-${Date.now()}.png`;
     const filePath = `${tmpDir.name}/${filename}`;
-    const delay = 10000;
+    // const delay = 10000;
     const renderUrl = `${config.get('service.appUrl')}${widget}`;
 
     if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
@@ -102,20 +102,33 @@ class WebshotRouter {
       logger.debug(`Saving in: ${filePath}`);
 
       // Using Puppeteer
-      const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-      const page = await browser.newPage();
-      await page.setViewport(viewportOptions);
-      await page.goto(renderUrl, { waitUntil: ['networkidle2', 'domcontentloaded'] });
-      if (delay) await page.waitFor(delay);
+      await puppeteer.launch({ args: ['--no-sandbox'] }).then(async browser => {
+        const page = await browser.newPage();
 
-      // element
-      const element = await page.$('.widget-content');
-      await element.screenshot({ path: filePath });
+        await page.setViewport(viewportOptions);
+        await page.goto(renderUrl, { waitUntil: ['networkidle2', 'domcontentloaded'] });
 
-      browser.close();
+        await page.waitFor(
+          () => document.querySelector('.chart') && document.querySelector('.chart').children.length > 1,
+          { timeout: 30000 }
+        )
+          .then(async () => {
+            // TODO: this is a hack to account for the fact that the <canvas> is added to the DOM but takes a bit to actually render
+            await page.waitFor(1000);
 
-      const s3file = await S3Service.uploadFileToS3(filePath, filename);
-      ctx.body = { data: { widgetThumbnail: s3file } };
+            const element = await page.$('.widget-content');
+            await element.screenshot({ path: filePath });
+
+            const s3file = await S3Service.uploadFileToS3(filePath, filename);
+            ctx.body = { data: { widgetThumbnail: s3file } };
+
+            browser.close();
+          }, (error) => {
+            logger.error(`Could not render widget: ${error}`);
+            throw error;
+          });
+      });
+
     } catch (err) {
       logger.error(err);
       throw err;
