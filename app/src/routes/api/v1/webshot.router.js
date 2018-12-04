@@ -90,7 +90,6 @@ class WebshotRouter {
     const tmpDir = tmp.dirSync();
     const filename = `${widget}-${Date.now()}.png`;
     const filePath = `${tmpDir.name}/${filename}`;
-    // const delay = 10000;
     const renderUrl = `${config.get('service.appUrl')}${widget}`;
 
     if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
@@ -124,7 +123,7 @@ class WebshotRouter {
 
             browser.close();
           }, (error) => {
-            logger.error(`Could not render widget: ${error}`);
+            logger.error(`Could not render screenshot for widget ${widget}: ${error}`);
             throw error;
           });
       });
