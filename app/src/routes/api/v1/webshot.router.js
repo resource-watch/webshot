@@ -5,6 +5,8 @@ const send = require('koa-send');
 const tmp = require('tmp');
 const url = require('url');
 const rimraf = require('rimraf');
+const S3Service = require('services/s3.service');
+const config = require('config');
 
 const router = new Router({
   prefix: '/webshot',
@@ -49,8 +51,8 @@ class WebshotRouter {
     const delay = getDelayParam(ctx.query.waitFor);
 
     if (ctx.query.landscape && ctx.query.landscape === 'true') viewportOptions.isLandscape = true;
-    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width);
-    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height);
+    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
+    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
 
     try {
       logger.debug(`Saving in: ${filePath}`);
@@ -62,7 +64,11 @@ class WebshotRouter {
       await page.goto(ctx.query.url, gotoOptions);
       if (delay) await page.waitFor(delay);
       if (ctx.query.mediatype) await page.emulateMedia(ctx.query.mediatype);
-      await page.pdf({ path: filePath, format: 'A4' });
+
+      // Whether or not to include the background
+      const printBackground = !!(ctx.query.backgrounds && ctx.query.backgrounds === 'true');
+
+      await page.pdf({ path: filePath, format: 'A4', printBackground });
 
       browser.close();
 
@@ -75,8 +81,62 @@ class WebshotRouter {
     }
   }
 
+  static async widgetThumbnail(ctx) {
+    const widget = ctx.params.widget;
+    logger.info(`Generating thumbnail for widget ${widget}`);
+
+    // Validating URL
+    const viewportOptions = Object.assign({}, viewportDefaultOptions);
+    const tmpDir = tmp.dirSync();
+    const filename = `${widget}-${Date.now()}.png`;
+    const filePath = `${tmpDir.name}/${filename}`;
+    const renderUrl = `${config.get('service.appUrl')}${widget}`;
+
+    if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
+    if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
+
+    logger.info(`Capturing URL: ${renderUrl}`);
+
+    try {
+      logger.debug(`Saving in: ${filePath}`);
+
+      // Using Puppeteer
+      await puppeteer.launch({ args: ['--no-sandbox'] }).then(async browser => {
+        const page = await browser.newPage();
+
+        await page.setViewport(viewportOptions);
+        await page.goto(renderUrl, { waitUntil: ['networkidle2', 'domcontentloaded'] });
+
+        await page.waitFor(
+          () => document.querySelector('.chart') && document.querySelector('.chart').children.length > 1,
+          { timeout: 30000 }
+        )
+          .then(async () => {
+            // TODO: this is a hack to account for the fact that the <canvas> is added to the DOM but takes a bit to actually render
+            await page.waitFor(1000);
+
+            const element = await page.$('.widget-content');
+            await element.screenshot({ path: filePath });
+
+            const s3file = await S3Service.uploadFileToS3(filePath, filename);
+            ctx.body = { data: { widgetThumbnail: s3file } };
+
+            browser.close();
+          }, (error) => {
+            logger.error(`Could not render screenshot for widget ${widget}: ${error}`);
+            throw error;
+          });
+      });
+
+    } catch (err) {
+      logger.error(err);
+      throw err;
+    }
+  }
+
 }
 
 router.get('/', WebshotRouter.screenshot);
+router.post('/widget/:widget/thumbnail', WebshotRouter.widgetThumbnail);
 
 module.exports = router;

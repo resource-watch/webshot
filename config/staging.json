@@ -4,5 +4,8 @@
         "level": "debug",
         "toFile": false,
         "dirLogFile": null
+    },
+    "service": {
+        "appUrl": "https://staging.resourcewatch.org/embed/widget/"
     }
 }

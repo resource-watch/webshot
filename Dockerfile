@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
 	apt-transport-https \
 	ca-certificates \
 	curl \
+	libgconf-2-4 \
   gnupg \
   bash \
   build-essential \
@@ -24,7 +25,7 @@ RUN groupadd -r $USER && useradd -r -g $USER -G audio,video $USER \
     && mkdir -p /home/$USER && chown -R $USER:$USER /home/$USER
 
 
-RUN npm install -g grunt-cli bunyan
+RUN npm install --unsafe-perm -g grunt-cli bunyan
 
 RUN mkdir -p /home/$USER
 COPY package.json /home/$USER/package.json
