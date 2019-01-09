@@ -108,7 +108,7 @@ class WebshotRouter {
         await page.goto(renderUrl, { waitUntil: ['networkidle2', 'domcontentloaded'] });
 
         await page.waitFor(
-          () => document.querySelector('.chart') && document.querySelector('.chart').children.length > 1,
+          () => window.WEBSHOT_READY,
           { timeout: 30000 }
         )
           .then(async () => {
