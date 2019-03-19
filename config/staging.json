@@ -1,7 +1,7 @@
 {
     "logger": {
         "name": "webshot-service",
-        "level": "info"
+        "level": "warn"
     },
     "service": {
         "appUrl": "https://staging.resourcewatch.org/embed/widget/"
