@@ -1,9 +1,7 @@
 {
      "logger": {
         "name": "webshot-service-DEV",
-        "level": "debug",
-        "toFile": false,
-        "dirLogFile": null
+        "level": "debug"
     },
     "service": {
         "name": "Webshot service",

@@ -32,6 +32,8 @@ spec:
             value: app/src
           - name: LOCAL_URL
             value: http://{name}.default.svc.cluster.local:5000
+          - name: WIDGET_RENDER_URL
+            value: https://staging.resourcewatch.org/webshot/
           - name: CT_URL
             valueFrom:
                 secretKeyRef:

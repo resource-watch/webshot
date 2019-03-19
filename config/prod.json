@@ -1,8 +1,6 @@
 {
     "logger": {
         "name": "webshot-service",
-        "level": "warn",
-        "toFile": false,
-        "dirLogFile": null
+        "level": "warn"
     }
 }
