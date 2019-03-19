@@ -1,9 +1,7 @@
 {
     "logger": {
         "name": "webshot-service",
-        "level": "debug",
-        "toFile": false,
-        "dirLogFile": null
+        "level": "debug"
     },
     "service": {
         "appUrl": "https://staging.resourcewatch.org/embed/widget/"
