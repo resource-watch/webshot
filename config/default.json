@@ -6,6 +6,6 @@
     "service": {
         "name": "Webshot service",
         "port": 5000,
-        "appUrl": "https://resourcewatch.org/embed/widget/"
+        "appUrl": "https://resourcewatch.org/webshot/"
     }
 }
