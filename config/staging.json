@@ -4,6 +4,6 @@
         "level": "warn"
     },
     "service": {
-        "appUrl": "https://staging.resourcewatch.org/embed/widget/"
+        "appUrl": "https://staging.resourcewatch.org/webshot/"
     }
 }
