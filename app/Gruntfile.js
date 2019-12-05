@@ -50,6 +50,20 @@ module.exports = (grunt) => {
                 }
             },
 
+        },
+
+        nyc: {
+            cover: {
+                options: {
+                    include: ['app/src/**'],
+                    exclude: '*.test.*',
+                    reporter: ['lcov', 'text-summary'],
+                    reportDir: 'coverage',
+                    all: true
+                },
+                cmd: false,
+                args: ['grunt', '--gruntfile', 'app/Gruntfile.js', 'mochaTest:e2e']
+            }
         }
     });
 
@@ -61,4 +75,5 @@ module.exports = (grunt) => {
 
     grunt.registerTask('default', 'serve');
 
+    grunt.loadNpmTasks('grunt-simple-nyc');
 };
