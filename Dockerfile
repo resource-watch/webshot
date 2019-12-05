@@ -1,5 +1,5 @@
-FROM node:8.4
-MAINTAINER raul.requero@vizzuality.com
+FROM node:12
+MAINTAINER info@vizzuality.com
 
 ENV USER webshot-service
 
@@ -25,11 +25,11 @@ RUN groupadd -r $USER && useradd -r -g $USER -G audio,video $USER \
     && mkdir -p /home/$USER && chown -R $USER:$USER /home/$USER
 
 
-RUN npm install --unsafe-perm -g grunt-cli bunyan
+RUN yarn global add grunt-cli bunyan
 
 RUN mkdir -p /home/$USER
 COPY package.json /home/$USER/package.json
-RUN cd /home/$USER && npm install
+RUN cd /home/$USER && yarn install
 
 COPY entrypoint.sh /home/$USER/entrypoint.sh
 COPY config /home/$USER/config

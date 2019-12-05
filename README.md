@@ -32,7 +32,7 @@ You can now access the microservice through the CT gateway.
 
 Start by installing the node dependencies using:
 ```
-npm install
+yarn install
 ```
 
 You need to ensure the configuration below is present before starting the application server. You can do so using a 
@@ -40,7 +40,7 @@ You need to ensure the configuration below is present before starting the applic
 
 Once the configuration variables are set you can start the application server:
 ```
-npm start
+yarn start
 ```
 
 ### Configuration
