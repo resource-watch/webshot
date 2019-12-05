@@ -4,8 +4,9 @@
   "description": "Webshot micro service for the Resource Watch API.",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js e2eTest",
-    "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index.js"
+    "test": "NODE_ENV=test NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js e2eTest",
+    "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index.js",
+    "coverage": "NODE_ENV=test NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js nyc"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,7 @@
     "url": "http://vizzuality.com/"
   },
   "engines": {
-    "node": "~12"
+    "node": "~11"
   },
   "license": "MIT",
   "devDependencies": {
@@ -41,6 +42,7 @@
     "grunt-express-server": "0.5.4",
     "grunt-mocha-test": "0.13.3",
     "grunt-notify": "0.4.5",
+    "grunt-simple-nyc": "^3.0.1",
     "husky": "^3.1.0",
     "lint-staged": "^9.5.0",
     "mocha": "5.2.0",
