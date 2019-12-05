@@ -1,4 +1,4 @@
-FROM node:11
+FROM node:12
 MAINTAINER info@vizzuality.com
 
 ENV USER webshot-service
