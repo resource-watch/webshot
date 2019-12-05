@@ -1,6 +1,7 @@
 const Koa = require('koa');
 const logger = require('logger');
 const koaLogger = require('koa-logger');
+const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 const config = require('config');
 const loader = require('loader');
 const convert = require('koa-convert');
@@ -41,6 +42,7 @@ app.use(async (ctx, next) => {
 });
 
 app.use(koaLogger());
+app.use(koaSimpleHealthCheck());
 
 loader.loadRoutes(app);
 
