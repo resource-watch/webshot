@@ -17,6 +17,9 @@
     "email": "hello@vizzuality.com",
     "url": "http://vizzuality.com/"
   },
+  "engines": {
+    "node": "~12"
+  },
   "license": "MIT",
   "devDependencies": {
     "assert": "^1.4.1",
