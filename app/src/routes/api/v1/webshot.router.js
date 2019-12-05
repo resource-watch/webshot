@@ -5,7 +5,7 @@ const send = require('koa-send');
 const tmp = require('tmp');
 const url = require('url');
 const rimraf = require('rimraf');
-const S3Service = require('services/s3.service');
+const S3Service = require('@auth0/s3');
 const config = require('config');
 
 const router = new Router({
@@ -17,6 +17,7 @@ const gotoOptions = { waitUntil: 'networkidle' };
 
 const getDelayParam = (param) => {
     const n = parseInt(param, 10);
+    // eslint-disable-next-line no-restricted-globals
     if (typeof n === 'number' && !isNaN(n)) return n;
     return param;
 };
@@ -44,7 +45,7 @@ class WebshotRouter {
         const urlObject = url.parse(ctx.query.url);
         ctx.assert(/http|https/.test(urlObject.protocol), 400, 'The protocol in url param is not valid. Use http or https.');
 
-        const viewportOptions = Object.assign({}, viewportDefaultOptions);
+        const viewportOptions = { ...viewportDefaultOptions };
         const tmpDir = tmp.dirSync();
         const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
         const filePath = `${tmpDir.name}/${filename}`;
@@ -82,11 +83,11 @@ class WebshotRouter {
     }
 
     static async widgetThumbnail(ctx) {
-        const widget = ctx.params.widget;
+        const { widget } = ctx.params;
         logger.info(`Generating thumbnail for widget ${widget}`);
 
         // Validating URL
-        const viewportOptions = Object.assign({}, viewportDefaultOptions);
+        const viewportOptions = { ...viewportDefaultOptions };
         const tmpDir = tmp.dirSync();
         const filename = `${widget}-${Date.now()}.png`;
         const filePath = `${tmpDir.name}/${filename}`;
@@ -101,13 +102,14 @@ class WebshotRouter {
             logger.debug(`Saving in: ${filePath}`);
 
             // Using Puppeteer
-            await puppeteer.launch({ args: ['--no-sandbox'] }).then(async browser => {
+            await puppeteer.launch({ args: ['--no-sandbox'] }).then(async (browser) => {
                 const page = await browser.newPage();
 
                 await page.setViewport(viewportOptions);
                 await page.goto(renderUrl, { waitUntil: ['networkidle2', 'domcontentloaded'] });
 
                 await page.waitFor(
+                    // eslint-disable-next-line no-undef
                     () => window.WEBSHOT_READY,
                     { timeout: 30000 }
                 )
