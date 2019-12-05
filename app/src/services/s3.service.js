@@ -1,5 +1,5 @@
 const logger = require('logger');
-const s3 = require('s3');
+const s3 = require('@auth0/s3');
 const MissingS3Credentials = require('errors/missingS3Credentials.error');
 
 const { S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY } = process.env;
@@ -25,33 +25,29 @@ class S3Service {
             }
         });
 
-        try {
-            logger.info('[SERVICE] Uploading to S3');
-            const key = `resourcewatch/${process.env.NODE_ENV}/thumbnails/${fileName}`;
-            const params = {
-                localFile: filePath,
-                s3Params: {
-                    Bucket: 'wri-api-backups',
-                    Key: key,
-                    ACL: 'public-read'
-                }
-            };
-            const uploader = S3Client.uploadFile(params);
-            await new Promise((resolve, reject) => {
-                uploader.on('end', data => {
-                    logger.info('[SERVICE] File uploaded to S3');
-                    resolve(data);
-                });
-                uploader.on('error', err => {
-                    logger.error('[SERVICE] Error uploading file to S3: ', err);
-                    reject(err);
-                });
+        logger.info('[SERVICE] Uploading to S3');
+        const key = `resourcewatch/${process.env.NODE_ENV}/thumbnails/${fileName}`;
+        const params = {
+            localFile: filePath,
+            s3Params: {
+                Bucket: 'wri-api-backups',
+                Key: key,
+                ACL: 'public-read'
+            }
+        };
+        const uploader = S3Client.uploadFile(params);
+        await new Promise((resolve, reject) => {
+            uploader.on('end', (data) => {
+                logger.info('[SERVICE] File uploaded to S3');
+                resolve(data);
             });
-            const s3file = s3.getPublicUrlHttp(params.s3Params.Bucket, params.s3Params.Key);
-            return s3file;
-        } catch (err) {
-            throw err;
-        }
+            uploader.on('error', (err) => {
+                logger.error('[SERVICE] Error uploading file to S3: ', err);
+                reject(err);
+            });
+        });
+        const s3file = s3.getPublicUrlHttp(params.s3Params.Bucket, params.s3Params.Key);
+        return s3file;
     }
 
 }
