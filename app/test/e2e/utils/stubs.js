@@ -1,9 +1,8 @@
-const sinon = require('sinon');
 const puppeteer = require('puppeteer');
 const s3 = require('@auth0/s3');
 const EventEmitter = require('events');
 
-const stubPuppeteer = () => {
+const stubPuppeteer = (sinon, success = true) => {
     sinon.stub(puppeteer, 'launch').returns(new Promise((resolve) => resolve({
         newPage() {
             return {
@@ -11,7 +10,14 @@ const stubPuppeteer = () => {
                 goto() { return true; },
                 waitFor() { return true; },
                 $() {
-                    return { screenshot() { return true; } };
+                    return {
+                        screenshot() {
+                            if (!success) {
+                                throw new Error();
+                            }
+                            return true;
+                        }
+                    };
                 }
             };
         },
@@ -19,11 +25,11 @@ const stubPuppeteer = () => {
     })));
 };
 
-const stubS3 = (url) => {
+const stubS3 = (sinon, url, success = true) => {
     sinon.stub(s3, 'createClient').returns({
         uploadFile() {
             const eventEmitter = new EventEmitter();
-            setTimeout(() => { eventEmitter.emit('end'); }, 1000);
+            setTimeout(() => { eventEmitter.emit(success ? 'end' : 'error'); }, 500);
             return eventEmitter;
         },
     });
