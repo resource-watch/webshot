@@ -9,69 +9,74 @@ const ctRegisterMicroservice = require('ct-register-microservice-node');
 const ErrorSerializer = require('serializers/error.serializer');
 require('dotenv').config();
 
-const koaBody = require('koa-body')({
-    multipart: true,
-    jsonLimit: '50mb',
-    formLimit: '50mb',
-    textLimit: '50mb'
-});
+async function init() {
+    return new Promise((resolve) => {
+        const app = new Koa();
 
-const app = new Koa();
-
-app.use(convert(koaBody));
-
-app.use(async (ctx, next) => {
-    try {
-        await next();
-    } catch (err) {
-        let error = err;
-        try {
-            error = JSON.parse(err);
-        } catch (e) {
-            logger.error('Could not parse error message - is it JSON?: ', err);
-        }
-        ctx.status = error.status || 500;
-        if (ctx.status >= 500) {
-            logger.error(error);
-        } else {
-            logger.info(error);
-        }
-        ctx.body = ErrorSerializer.serializeError(ctx.status, error.message);
-        if (process.env.NODE_ENV === 'prod' && this.status === 500) {
-            ctx.body = 'Unexpected error';
-        }
-        ctx.response.type = 'application/vnd.api+json';
-    }
-
-});
-
-app.use(koaLogger());
-app.use(koaSimpleHealthCheck());
-
-loader.loadRoutes(app);
-
-const instance = app.listen(process.env.PORT, () => {
-    if (process.env.CT_URL) {
-        ctRegisterMicroservice.register({
-            info: require('../microservice/register.json'),
-            swagger: require('../microservice/public-swagger.json'),
-            mode: (process.env.CT_REGISTER_MODE && process.env.CT_REGISTER_MODE === 'auto') ? ctRegisterMicroservice.MODE_AUTOREGISTER : ctRegisterMicroservice.MODE_NORMAL,
-            framework: ctRegisterMicroservice.KOA2,
-            app,
-            logger,
-            name: config.get('service.name'),
-            ctUrl: process.env.CT_URL,
-            url: process.env.LOCAL_URL,
-            token: process.env.CT_TOKEN,
-            active: true,
-        }).then(() => {
-        }, (err) => {
-            logger.error(err);
-            process.exit(1);
+        const koaBody = require('koa-body')({
+            multipart: true,
+            jsonLimit: '50mb',
+            formLimit: '50mb',
+            textLimit: '50mb'
         });
-    }
-});
 
-module.exports = instance;
+        app.use(convert(koaBody));
 
-logger.info('Server started in ', process.env.PORT);
+        app.use(async (ctx, next) => {
+            try {
+                await next();
+            } catch (err) {
+                let error = err;
+                try {
+                    error = JSON.parse(err);
+                } catch (e) {
+                    logger.error('Could not parse error message - is it JSON?: ', err);
+                }
+                ctx.status = error.status || 500;
+                if (ctx.status >= 500) {
+                    logger.error(error);
+                } else {
+                    logger.info(error);
+                }
+                ctx.body = ErrorSerializer.serializeError(ctx.status, error.message);
+                if (process.env.NODE_ENV === 'prod' && this.status === 500) {
+                    ctx.body = 'Unexpected error';
+                }
+                ctx.response.type = 'application/vnd.api+json';
+            }
+
+        });
+
+        app.use(koaLogger());
+        app.use(koaSimpleHealthCheck());
+
+        loader.loadRoutes(app);
+
+        const server = app.listen(process.env.PORT, () => {
+            if (process.env.CT_URL) {
+                ctRegisterMicroservice.register({
+                    info: require('../microservice/register.json'),
+                    swagger: require('../microservice/public-swagger.json'),
+                    mode: (process.env.CT_REGISTER_MODE && process.env.CT_REGISTER_MODE === 'auto') ? ctRegisterMicroservice.MODE_AUTOREGISTER : ctRegisterMicroservice.MODE_NORMAL,
+                    framework: ctRegisterMicroservice.KOA2,
+                    app,
+                    logger,
+                    name: config.get('service.name'),
+                    ctUrl: process.env.CT_URL,
+                    url: process.env.LOCAL_URL,
+                    token: process.env.CT_TOKEN,
+                    active: true,
+                }).then(() => {
+                }, (err) => {
+                    logger.error(err);
+                    process.exit(1);
+                });
+            }
+        });
+
+        logger.info('Server started in ', process.env.PORT);
+        resolve({ app, server });
+    });
+}
+
+module.exports = init;
