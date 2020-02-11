@@ -63,4 +63,8 @@ describe('POST widget/:widget/thumbnail', () => {
 
         sinonSandbox.restore();
     });
+
+    after(() => {
+        requester.close();
+    });
 });

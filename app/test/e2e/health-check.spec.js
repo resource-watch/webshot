@@ -25,5 +25,6 @@ describe('GET healthcheck', () => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
+        requester.close();
     });
 });
