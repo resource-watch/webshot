@@ -49,7 +49,8 @@ class WebshotRouter {
 
         const viewportOptions = { ...viewportDefaultOptions };
         const tmpDir = tmp.dirSync();
-        const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
+        const saveAs = ctx.query.format || 'pdf';
+        const filename = `${ctx.query.filename}-${Date.now()}.${saveAs}`;
         const filePath = `${tmpDir.name}/${filename}`;
         const delay = getDelayParam(ctx.query.waitFor);
 
@@ -70,17 +71,30 @@ class WebshotRouter {
 
             // Whether or not to include the background
             const printBackground = !!(ctx.query.backgrounds && ctx.query.backgrounds === 'true');
-
-            await page.pdf({ path: filePath, format: 'A4', printBackground });
+            if (ctx.query.format === 'png') {
+                await page.screenshot({
+                    path: filePath,
+                    format: 'A4',
+                    printBackground
+                });
+            } else {
+                await page.pdf({
+                    path: filePath,
+                    format: 'A4',
+                    printBackground
+                });
+            }
 
             browser.close();
 
             // Sending file to download
             ctx.set('Content-disposition', `attachment; filename=${filename}`);
-            ctx.set('Content-type', 'application/pdf');
+            const contentType = `application/${saveAs}`;
+            ctx.set('Content-type', contentType);
             await send(ctx, filePath, { root: '/' });
         } catch (err) {
             logger.error(err);
+            throw err;
         }
     }
 
@@ -146,3 +160,4 @@ router.get('/', WebshotRouter.screenshot);
 router.post('/widget/:widget/thumbnail', WebshotRouter.widgetThumbnail);
 
 module.exports = router;
+module.exports.WebshotRouter = WebshotRouter;

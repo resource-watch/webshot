@@ -9,6 +9,7 @@ const stubPuppeteer = (sinon, success = true) => {
                 setViewport() { return true; },
                 goto() { return true; },
                 waitFor() { return true; },
+                emulateMedia() { return true; },
                 $() {
                     return {
                         screenshot() {
@@ -18,6 +19,18 @@ const stubPuppeteer = (sinon, success = true) => {
                             return true;
                         }
                     };
+                },
+                screenshot() {
+                    if (!success) {
+                        throw new Error();
+                    }
+                    return true;
+                },
+                pdf() {
+                    if (!success) {
+                        throw new Error();
+                    }
+                    return true;
                 }
             };
         },
@@ -37,4 +50,30 @@ const stubS3 = (sinon, url, success = true) => {
     sinon.stub(s3, 'getPublicUrlHttp').returns(url);
 };
 
-module.exports = { stubPuppeteer, stubS3 };
+const stubKoaSend = (sinon, success = true) => {
+    // First we need to remove the doStuff module
+    if (require.cache[require.resolve('routes/api/v1/webshot.router')]) {
+        delete require.cache[require.resolve('routes/api/v1/webshot.router')];
+    }
+
+    // Second we need rewrite the cached sum module to be as follows:
+    require.cache[require.resolve('koa-send')] = {
+        exports: async function send(ctx, path) {
+            if (!success) {
+                throw new Error();
+            }
+
+            const fileFormat = path.split('.').pop();
+            ctx.set('Content-Length', 100);
+            ctx.type = `application/${fileFormat}`;
+            ctx.body = 'BODY EXAMPLE';
+
+            return `/path/to/${fileFormat}`;
+        }
+    };
+
+    // Third we need to require the doStuff module again
+    require('routes/api/v1/webshot.router');
+};
+
+module.exports = { stubPuppeteer, stubS3, stubKoaSend };
