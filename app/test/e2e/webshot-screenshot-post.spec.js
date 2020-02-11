@@ -2,7 +2,7 @@ const chai = require('chai');
 const nock = require('nock');
 const sinon = require('sinon');
 
-const { getTestServer } = require('./utils/test-server');
+const { getTestServer, closeTestAgent } = require('./utils/test-server');
 const { stubPuppeteer, stubKoaSend } = require('./utils/stubs');
 
 chai.should();
@@ -13,7 +13,7 @@ let sinonSandbox;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('GET /', () => {
+describe('Screenshot endpoint', () => {
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -46,28 +46,56 @@ describe('GET /', () => {
         });
     });
 
-    it('If puppeteer fails taking the screenshot returns 500 Internal Server Error', async () => {
-        stubPuppeteer(sinonSandbox, false);
+    it('If there is no URL returns 400 Internal Server Error', async () => {
+        stubPuppeteer(sinonSandbox);
         stubKoaSend(sinonSandbox, true);
 
         requester = await getTestServer();
 
-        const response = await requester.get(`/api/v1/webshot?url=http://www.example.com&filename=newname`).send();
-        response.status.should.equal(500);
+        const response = await requester.get(`/api/v1/webshot?url=&filename=newname`).send();
+        response.status.should.equal(400);
         response.body.should.have.property('errors').and.be.an('array');
-        response.body.errors[0].should.have.property('status').and.equal(500);
+        response.body.errors[0].should.have.property('status').and.equal(400);
+        response.body.errors[0].should.have.property('detail').and.include('url param is required');
     });
 
-    it('If send fails returns 500 Internal Server Error', async () => {
-        stubPuppeteer(sinonSandbox, false);
-        stubKoaSend(sinonSandbox, false);
+    it('If there is no filename returns 400 Internal Server Error', async () => {
+        stubPuppeteer(sinonSandbox);
+        stubKoaSend(sinonSandbox, true);
 
         requester = await getTestServer();
 
-        const response = await requester.get(`/api/v1/webshot?url=http://www.example.com&filename=newname`).send();
-        response.status.should.equal(500);
+        const response = await requester.get(`/api/v1/webshot?url=http://www.example.com&filename=`).send();
+        response.status.should.equal(400);
         response.body.should.have.property('errors').and.be.an('array');
-        response.body.errors[0].should.have.property('status').and.equal(500);
+        response.body.errors[0].should.have.property('status').and.equal(400);
+        response.body.errors[0].should.have.property('detail').and.include('filename param is required');
+    });
+
+    it('If format is invalid returns 400 Internal Server Error', async () => {
+        stubPuppeteer(sinonSandbox);
+        stubKoaSend(sinonSandbox, true);
+
+        requester = await getTestServer();
+
+        const response = await requester.get(`/api/v1/webshot?url=http://www.example.com&filename=newname&format=bmp`).send();
+        response.status.should.equal(400);
+        response.body.should.have.property('errors').and.be.an('array');
+        response.body.errors[0].should.have.property('status').and.equal(400);
+        response.body.errors[0].should.have.property('detail').and.include('format param is invalid');
+    });
+
+    it('If protocol in url is invalid returns 400 Internal Server Error', async () => {
+        stubPuppeteer(sinonSandbox);
+        stubKoaSend(sinonSandbox, true);
+
+        requester = await getTestServer();
+
+        const response = await requester.get(`/api/v1/webshot?url=file://www.example.com&filename=newname`).send();
+        response.status.should.equal(400);
+        response.body.should.have.property('errors').and.be.an('array');
+        response.body.errors[0].should.have.property('status').and.equal(400);
+        response.body.errors[0].should.have.property('detail').and.include('The protocol in url param is not valid. Use http or https.');
     });
 
     afterEach(() => {
@@ -75,7 +103,8 @@ describe('GET /', () => {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
 
-        requester.close();
+        closeTestAgent();
+
         sinonSandbox.restore();
     });
 });

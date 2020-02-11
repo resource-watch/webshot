@@ -34,14 +34,14 @@ describe('POST widget/:widget/thumbnail', () => {
         response.body.data.should.have.property('widgetThumbnail').and.equal('http://www.example.com');
     });
 
-    it('If puppeteer fails taking the screenshot returns 500 Internal Server Error', async () => {
+    it('If puppeteer fails taking the screenshot returns 400 Internal Server Error', async () => {
         stubPuppeteer(sinonSandbox, false);
         stubS3(sinonSandbox, 'http://www.example.com');
 
         const response = await requester.post(`/api/v1/webshot/widget/123/thumbnail`).send();
-        response.status.should.equal(500);
+        response.status.should.equal(400);
         response.body.should.have.property('errors').and.be.an('array');
-        response.body.errors[0].should.have.property('status').and.equal(500);
+        response.body.errors[0].should.have.property('status').and.equal(400);
         response.body.errors[0].should.have.property('detail').and.include('Error taking screenshot on URL');
     });
 
@@ -62,9 +62,5 @@ describe('POST widget/:widget/thumbnail', () => {
         }
 
         sinonSandbox.restore();
-    });
-
-    after(() => {
-        requester.close();
     });
 });

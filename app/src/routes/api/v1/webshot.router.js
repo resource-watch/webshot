@@ -9,6 +9,7 @@ const S3Service = require('services/s3.service');
 const config = require('config');
 const UploadFileS3Error = require('errors/uploadFileS3.error');
 const WebshotURLError = require('errors/webshotURL.error');
+const KoaSendError = require('errors/koaSend.error');
 
 const router = new Router({
     prefix: '/webshot',
@@ -23,6 +24,9 @@ const getDelayParam = (param) => {
     if (typeof n === 'number' && !isNaN(n)) return n;
     return param;
 };
+
+
+const VALID_FORMATS = ['pdf', 'png'];
 
 class WebshotRouter {
 
@@ -40,7 +44,10 @@ class WebshotRouter {
 
     static async screenshot(ctx) {
         ctx.assert(ctx.query.url, 400, 'url param is required');
-        ctx.assert(ctx.query.filename, 400, 'filename param required');
+        ctx.assert(ctx.query.filename, 400, 'filename param is required');
+        if (ctx.query.format && !VALID_FORMATS.includes(ctx.query.format)) {
+            ctx.assert(ctx.query.query, 400, 'format param is invalid');
+        }
         logger.info(`Doing screenshot of ${ctx.query.url}`);
 
         // Validating URL
@@ -58,11 +65,12 @@ class WebshotRouter {
         if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
         if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
 
+        let browser;
         try {
             logger.debug(`Saving in: ${filePath}`);
 
             // Using Puppeteer
-            const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+            browser = await puppeteer.launch({ args: ['--no-sandbox'] });
             const page = await browser.newPage();
             await page.setViewport(viewportOptions);
             await page.goto(ctx.query.url, gotoOptions);
@@ -84,17 +92,20 @@ class WebshotRouter {
                     printBackground
                 });
             }
+        } catch (error) {
+            throw new WebshotURLError(`Error taking screenshot on URL ${ctx.query.url}: ${error}`);
+        }
 
-            browser.close();
+        browser.close();
 
+        try {
             // Sending file to download
             ctx.set('Content-disposition', `attachment; filename=${filename}`);
             const contentType = `application/${saveAs}`;
             ctx.set('Content-type', contentType);
             await send(ctx, filePath, { root: '/' });
-        } catch (err) {
-            logger.error(err);
-            throw err;
+        } catch (error) {
+            throw new KoaSendError(`Error sending screenshot ${ctx.query.url}: ${error}`);
         }
     }
 
