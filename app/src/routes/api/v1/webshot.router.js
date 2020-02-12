@@ -9,6 +9,7 @@ const S3Service = require('services/s3.service');
 const config = require('config');
 const UploadFileS3Error = require('errors/uploadFileS3.error');
 const WebshotURLError = require('errors/webshotURL.error');
+const WebshotNotFoundError = require('errors/webshotNotFound.error');
 const KoaSendError = require('errors/koaSend.error');
 
 const router = new Router({
@@ -93,7 +94,11 @@ class WebshotRouter {
                 });
             }
         } catch (error) {
-            throw new WebshotURLError(`Error taking screenshot on URL ${ctx.query.url}: ${error}`);
+            if (error.message === 'not found') {
+                throw new WebshotNotFoundError(`Error taking screenshot on URL ${ctx.query.url}: ${error}`);
+            } else {
+                throw new WebshotURLError(`Error taking screenshot on URL ${ctx.query.url}: ${error}`);
+            }
         }
 
         browser.close();
@@ -171,4 +176,3 @@ router.get('/', WebshotRouter.screenshot);
 router.post('/widget/:widget/thumbnail', WebshotRouter.widgetThumbnail);
 
 module.exports = router;
-module.exports.WebshotRouter = WebshotRouter;

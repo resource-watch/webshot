@@ -1,8 +1,8 @@
-# v1.0.0
-
 ## 12/02/2020
 
 - Add format query parameter to screenshot endpoint to allow pdf and png screenshots.
+
+# v1.0.0
 
 ## 14/01/2020
 
