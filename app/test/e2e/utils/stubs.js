@@ -2,12 +2,17 @@ const puppeteer = require('puppeteer');
 const s3 = require('@auth0/s3');
 const EventEmitter = require('events');
 
-const stubPuppeteer = (sinon, success = true) => {
+const stubPuppeteer = (sinon, success = true, notFound = false) => {
     sinon.stub(puppeteer, 'launch').returns(new Promise((resolve) => resolve({
         newPage() {
             return {
                 setViewport() { return true; },
-                goto() { return true; },
+                goto() {
+                    if (notFound) {
+                        throw new Error('not found');
+                    }
+                    return true;
+                },
                 waitFor() { return true; },
                 emulateMedia() { return true; },
                 $() {

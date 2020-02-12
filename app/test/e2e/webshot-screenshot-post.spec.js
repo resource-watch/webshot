@@ -46,7 +46,7 @@ describe('Screenshot endpoint', () => {
         });
     });
 
-    it('If there is no URL returns 400 Internal Server Error', async () => {
+    it('If there is no URL, returns 400 indicating url param is required', async () => {
         stubPuppeteer(sinonSandbox);
         stubKoaSend(sinonSandbox, true);
 
@@ -59,7 +59,7 @@ describe('Screenshot endpoint', () => {
         response.body.errors[0].should.have.property('detail').and.include('url param is required');
     });
 
-    it('If there is no filename returns 400 Internal Server Error', async () => {
+    it('If there is no filename, returns 400 indicating filename param is required', async () => {
         stubPuppeteer(sinonSandbox);
         stubKoaSend(sinonSandbox, true);
 
@@ -72,7 +72,7 @@ describe('Screenshot endpoint', () => {
         response.body.errors[0].should.have.property('detail').and.include('filename param is required');
     });
 
-    it('If format is invalid returns 400 Internal Server Error', async () => {
+    it('If format is invalid, returns 400 indicating format param is invalid', async () => {
         stubPuppeteer(sinonSandbox);
         stubKoaSend(sinonSandbox, true);
 
@@ -85,7 +85,7 @@ describe('Screenshot endpoint', () => {
         response.body.errors[0].should.have.property('detail').and.include('format param is invalid');
     });
 
-    it('If protocol in url is invalid returns 400 Internal Server Error', async () => {
+    it('If protocol in url is invalid, returns 400 indicating protocol param is invalid', async () => {
         stubPuppeteer(sinonSandbox);
         stubKoaSend(sinonSandbox, true);
 
@@ -98,13 +98,23 @@ describe('Screenshot endpoint', () => {
         response.body.errors[0].should.have.property('detail').and.include('The protocol in url param is not valid. Use http or https.');
     });
 
+    it('If url query param does not exist, returns 404 HTTP error code', async () => {
+        stubPuppeteer(sinonSandbox, true, true);
+        stubKoaSend(sinonSandbox, true);
+
+        requester = await getTestServer();
+
+        const response = await requester.get(`/api/v1/webshot?url=http://www.example.com&filename=newname`).send();
+        response.status.should.equal(404);
+    });
+
     afterEach(() => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
 
-        closeTestAgent();
-
         sinonSandbox.restore();
+
+        closeTestAgent();
     });
 });
