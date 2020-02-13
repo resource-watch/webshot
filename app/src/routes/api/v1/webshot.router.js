@@ -17,7 +17,7 @@ const router = new Router({
 });
 
 const viewportDefaultOptions = { width: 1024, height: 768, isMobile: true };
-const gotoOptions = { waitUntil: 'networkidle' };
+const gotoOptions = { waitUntil: 'networkidle2' };
 
 const getDelayParam = (param) => {
     const n = parseInt(param, 10);
@@ -83,7 +83,7 @@ class WebshotRouter {
             if (ctx.query.format === 'png') {
                 await page.screenshot({
                     path: filePath,
-                    format: 'A4',
+                    quality: 100,
                     printBackground
                 });
             } else {
