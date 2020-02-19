@@ -2,8 +2,8 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: {name}
-  name: {name}
+    name: webshot
+  name: webshot
 spec:
   revisionHistoryLimit: 0
   template:
@@ -11,11 +11,11 @@ spec:
       annotations:
         chaos.alpha.kubernetes.io/enabled: "true"
       labels:
-        name: {name}
+        name: webshot
     spec:
       containers:
-      - name: {name}
-        image: vizzuality/{name}
+      - name: webshot
+        image: vizzuality/webshot
         imagePullPolicy: Always
         resources:
           requests:
@@ -34,7 +34,7 @@ spec:
           - name: NODE_PATH
             value: app/src
           - name: LOCAL_URL
-            value: http://{name}.default.svc.cluster.local:5000
+            value: http://webshot.default.svc.cluster.local:5000
           - name: WIDGET_RENDER_URL
             value: https://staging.resourcewatch.org/webshot/
           - name: CT_URL
