@@ -83,7 +83,6 @@ class WebshotRouter {
             if (ctx.query.format === 'png') {
                 await page.screenshot({
                     path: filePath,
-                    quality: 100,
                     printBackground
                 });
             } else {
