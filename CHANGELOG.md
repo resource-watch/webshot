@@ -1,3 +1,7 @@
+## 26/02/2020
+
+- Remove quality option for screenshot because it is not compatible with png format
+
 ## 25/02/2020
 
 - Use networkidle2 for checking when the URL has been loaded
