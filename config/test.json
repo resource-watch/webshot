@@ -1,6 +1,6 @@
 {
-    "logger": {
-        "name": "webshot-service",
-        "level": "debug"
-    }
+  "logger": {
+    "name": "webshot-service",
+    "level": "debug"
+  }
 }

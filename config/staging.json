@@ -1,9 +1,9 @@
 {
-    "logger": {
-        "name": "webshot-service",
-        "level": "warn"
-    },
-    "service": {
-        "appUrl": "https://staging.resourcewatch.org/webshot/"
-    }
+  "logger": {
+    "name": "webshot-service",
+    "level": "warn"
+  },
+  "service": {
+    "appUrl": "https://staging.resourcewatch.org/webshot/"
+  }
 }

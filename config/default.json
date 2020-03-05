@@ -1,11 +1,12 @@
 {
-     "logger": {
-        "name": "webshot-service-DEV",
-        "level": "debug"
-    },
-    "service": {
-        "name": "Webshot service",
-        "port": 5000,
-        "appUrl": "https://resourcewatch.org/webshot/"
-    }
+  "logger": {
+    "name": "webshot-service-DEV",
+    "toFile": false,
+    "level": "debug"
+  },
+  "service": {
+    "name": "Webshot service",
+    "port": 5000,
+    "appUrl": "https://resourcewatch.org/webshot/"
+  }
 }

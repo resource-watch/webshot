@@ -20,3 +20,11 @@ exports.getTestServer = async function getTestServer() {
     requester = chai.request(server).keepOpen();
     return requester;
 };
+
+exports.closeTestAgent = function closeTestAgent() {
+    if (!requester) {
+        return;
+    }
+    requester.close();
+    requester = null;
+};

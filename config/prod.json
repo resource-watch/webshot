@@ -1,6 +1,6 @@
 {
-    "logger": {
-        "name": "webshot-service",
-        "level": "warn"
-    }
+  "logger": {
+    "name": "webshot-service",
+    "level": "warn"
+  }
 }

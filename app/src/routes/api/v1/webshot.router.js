@@ -9,13 +9,15 @@ const S3Service = require('services/s3.service');
 const config = require('config');
 const UploadFileS3Error = require('errors/uploadFileS3.error');
 const WebshotURLError = require('errors/webshotURL.error');
+const WebshotNotFoundError = require('errors/webshotNotFound.error');
+const KoaSendError = require('errors/koaSend.error');
 
 const router = new Router({
     prefix: '/webshot',
 });
 
 const viewportDefaultOptions = { width: 1024, height: 768, isMobile: true };
-const gotoOptions = { waitUntil: 'networkidle' };
+const gotoOptions = { waitUntil: 'networkidle2' };
 
 const getDelayParam = (param) => {
     const n = parseInt(param, 10);
@@ -23,6 +25,9 @@ const getDelayParam = (param) => {
     if (typeof n === 'number' && !isNaN(n)) return n;
     return param;
 };
+
+
+const VALID_FORMATS = ['pdf', 'png'];
 
 class WebshotRouter {
 
@@ -40,7 +45,10 @@ class WebshotRouter {
 
     static async screenshot(ctx) {
         ctx.assert(ctx.query.url, 400, 'url param is required');
-        ctx.assert(ctx.query.filename, 400, 'filename param required');
+        ctx.assert(ctx.query.filename, 400, 'filename param is required');
+        if (ctx.query.format && !VALID_FORMATS.includes(ctx.query.format)) {
+            ctx.assert(ctx.query.query, 400, 'format param is invalid');
+        }
         logger.info(`Doing screenshot of ${ctx.query.url}`);
 
         // Validating URL
@@ -49,7 +57,8 @@ class WebshotRouter {
 
         const viewportOptions = { ...viewportDefaultOptions };
         const tmpDir = tmp.dirSync();
-        const filename = `${ctx.query.filename}-${Date.now()}.pdf`;
+        const saveAs = ctx.query.format || 'pdf';
+        const filename = `${ctx.query.filename}-${Date.now()}.${saveAs}`;
         const filePath = `${tmpDir.name}/${filename}`;
         const delay = getDelayParam(ctx.query.waitFor);
 
@@ -57,11 +66,12 @@ class WebshotRouter {
         if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
         if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
 
+        let browser;
         try {
             logger.debug(`Saving in: ${filePath}`);
 
             // Using Puppeteer
-            const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+            browser = await puppeteer.launch({ args: ['--no-sandbox'] });
             const page = await browser.newPage();
             await page.setViewport(viewportOptions);
             await page.goto(ctx.query.url, gotoOptions);
@@ -70,17 +80,36 @@ class WebshotRouter {
 
             // Whether or not to include the background
             const printBackground = !!(ctx.query.backgrounds && ctx.query.backgrounds === 'true');
+            if (ctx.query.format === 'png') {
+                await page.screenshot({
+                    path: filePath,
+                    printBackground
+                });
+            } else {
+                await page.pdf({
+                    path: filePath,
+                    format: 'A4',
+                    printBackground
+                });
+            }
+        } catch (error) {
+            if (error.message === 'not found') {
+                throw new WebshotNotFoundError(`Error taking screenshot on URL ${ctx.query.url}: ${error}`);
+            } else {
+                throw new WebshotURLError(`Error taking screenshot on URL ${ctx.query.url}: ${error}`);
+            }
+        }
 
-            await page.pdf({ path: filePath, format: 'A4', printBackground });
+        browser.close();
 
-            browser.close();
-
+        try {
             // Sending file to download
             ctx.set('Content-disposition', `attachment; filename=${filename}`);
-            ctx.set('Content-type', 'application/pdf');
+            const contentType = `application/${saveAs}`;
+            ctx.set('Content-type', contentType);
             await send(ctx, filePath, { root: '/' });
-        } catch (err) {
-            logger.error(err);
+        } catch (error) {
+            throw new KoaSendError(`Error sending screenshot ${ctx.query.url}: ${error}`);
         }
     }
 
