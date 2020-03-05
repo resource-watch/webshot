@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     name: webshot
+    app: rw
   name: webshot
 spec:
   revisionHistoryLimit: 2
