@@ -1,52 +1,85 @@
-# Node Skeleton Microservice
+# Webshot Microservice
 
+[![Build Status](https://travis-ci.org/resource-watch/webshot.svg?branch=develop)](https://travis-ci.org/resource-watch/webshot)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/e361eed538fcc656c7cd/test_coverage)](https://codeclimate.com/github/resource-watch/webshot/test_coverage)
 
-This repository is the node skeleton microservice to create node microservice for WRI API
+## Dependencies
 
-1. [Getting Started](#getting-started)
+You will need [Control Tower](https://github.com/control-tower/control-tower) up and running - either natively or with Docker. Refer to the project's README for information on how to set it up.
 
-## Getting Started
+The Webshot Microservice microservice is built using [Node.js](https://nodejs.org/en/), and can be executed either natively or using Docker, each of which has its own set of requirements.
 
-### OS X + Docker
+Native execution requires:
+- [Node.js](https://nodejs.org/en/)
 
-**First, make sure that you have the [API gateway running
-locally](https://github.com/control-tower/control-tower).**
+Execution using Docker requires:
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-We're using Docker which, luckily for you, means that getting the
-application running locally should be fairly painless. First, make sure
-that you have [Docker Compose](https://docs.docker.com/compose/install/)
-installed on your machine.
+## Getting started
 
-```
-git clone https://github.com/Vizzuality/node-skeleton
-cd node-skeleton
-./service.sh develop
-./service.sh test
-```text
-
-You can now access the microservice through the CT gateway.
+Start by cloning the repository from github to your execution environment
 
 ```
-
-### Native execution
-
-Start by installing the node dependencies using:
-```
-yarn install
+git clone https://github.com/resource-watch/dataset.git && cd dataset
 ```
 
-You need to ensure the configuration below is present before starting the application server. You can do so using a 
-``` .env ``` file based on the provided ```.env.sample``` file. Refer to the configuration instructions below for more info.
+After that, follow one of the instructions below:
 
-Once the configuration variables are set you can start the application server:
+### Using native execution
+
+1 - Set up your environment variables. See `dev.env.sample` for a list of variables you should set, which are described in detail in [this section](#environment-variables) of the documentation. Native execution will NOT load the `dev.env` file content, so you need to use another way to define those values
+
+2 - Install node dependencies using yarn:
+```
+yarn
+```
+
+3 - Start the application server:
 ```
 yarn start
 ```
 
-### Configuration
+The endpoints provided by this microservice should now be available through Control Tower's URL.
 
-It is necessary to define these environment variables:
+### Using Docker
 
-* CT_URL => Control Tower URL. Leave empty for native execution
-* NODE_ENV => Environment (prod, staging, dev)
-* PORT => Port on which to execute the server. Leave empty for execution with Control Tower.
+1 - Create and complete your `dev.env` file with your configuration. The meaning of the variables is available in this [section](#configuration-environment-variables). You can find an example `dev.env.sample` file in the project root.
+
+2 - Execute the following command to run Control tower:
+
+```
+./webshot.sh develop
+```
+
+The endpoints provided by this microservice should now be available through Control Tower's URL.
+
+## Testing
+
+There are two ways to run the included tests:
+
+### Using native execution
+
+Follow the instruction above for setting up the runtime environment for native execution, then run:
+```
+yarn test
+```
+
+### Using Docker
+
+Follow the instruction above for setting up the runtime environment for Docker execution, then run:
+```
+./webshot.sh test
+```
+
+## Configuration
+
+### Environment variables
+
+- PORT => TCP port in which the service will run
+- NODE_PATH => relative path to the source code. Should be `app/src`
+- CT_REGISTER_MODE => if `auto` the microservice automatically registers on Control Tower on start
+- CT_TOKEN => 
+- API_VERSION => API version identifier that prefixes the URL. Should be `v1`
+
+You can optionally set other variables, see [this file](config/custom-environment-variables.json) for an extended list.
