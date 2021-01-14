@@ -1,6 +1,6 @@
 # Webshot Microservice
 
-[![Build Status](https://travis-ci.org/resource-watch/webshot.svg?branch=develop)](https://travis-ci.org/resource-watch/webshot)
+[![Build Status](https://travis-ci.com/resource-watch/webshot.svg?branch=dev)](https://travis-ci.com/resource-watch/webshot)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e361eed538fcc656c7cd/test_coverage)](https://codeclimate.com/github/resource-watch/webshot/test_coverage)
 
 ## Dependencies
