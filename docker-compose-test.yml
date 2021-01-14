@@ -10,4 +10,7 @@ test:
     API_VERSION: v1
     S3_ACCESS_KEY_ID: 1
     S3_SECRET_ACCESS_KEY: 1
+    LOCAL_URL: http://mymachine:3055
+    CT_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
+    FASTLY_ENABLED: "false"
   command: test
