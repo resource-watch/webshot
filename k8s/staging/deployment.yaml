@@ -93,7 +93,7 @@ spec:
               key: FASTLY_SERVICEID
               name: mssecrets
               optional: true
-        image: vizzuality/webshot
+        image: gfwdockerhub/webshot
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
