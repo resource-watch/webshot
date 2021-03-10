@@ -1,3 +1,7 @@
+## 10/03/2021
+
+- Update dockerfile setup with less dependencies and add pupeteer required lib
+
 ## 14/01/2021
 
 - Replace CT integration library
