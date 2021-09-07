@@ -1,3 +1,9 @@
+## 07/09/2021
+
+- Add missing chromium deps to dockerfile.
+- Update dev dependencies
+- Update `rw-api-microservice-node` to remove CT support.
+
 ## 31/05/2021
 
 - Update `rw-api-microservice-node` to add CORS support.
