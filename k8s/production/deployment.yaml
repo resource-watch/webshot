@@ -47,25 +47,15 @@ spec:
           value: http://webshot.default.svc.cluster.local:5000
         - name: WIDGET_RENDER_URL
           value: https://resourcewatch.org/webshot/
-        - name: CT_URL
+        - name: GATEWAY_URL
           valueFrom:
             secretKeyRef:
-              key: CT_URL
+              key: GATEWAY_URL
               name: mssecrets
-        - name: CT_TOKEN
+        - name: MICROSERVICE_TOKEN
           valueFrom:
             secretKeyRef:
-              key: CT_TOKEN
-              name: mssecrets
-        - name: CT_REGISTER_MODE
-          valueFrom:
-            secretKeyRef:
-              key: CT_REGISTER_MODE
-              name: mssecrets
-        - name: API_VERSION
-          valueFrom:
-            secretKeyRef:
-              key: API_VERSION
+              key: MICROSERVICE_TOKEN
               name: mssecrets
         - name: S3_ACCESS_KEY_ID
           valueFrom:
