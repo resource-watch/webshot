@@ -3,6 +3,7 @@
 - Add missing chromium deps to dockerfile.
 - Update dev dependencies
 - Update `rw-api-microservice-node` to remove CT support.
+- Remove unnecessary `jsonapi-serializer` dependency.
 
 ## 31/05/2021
 
