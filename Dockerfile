@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
 	ca-certificates \
 	curl \
 	libgconf-2-4 \
+    libxtst6 libxss1 \
   gnupg \
   bash \
   build-essential \
