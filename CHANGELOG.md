@@ -1,3 +1,7 @@
+## 09/09/2021
+
+- Pass along query parameters to rendering URL when generating widget thumbnails.
+
 ## 07/09/2021
 
 - Add missing chromium deps to dockerfile.

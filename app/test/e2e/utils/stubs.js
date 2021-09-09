@@ -2,19 +2,28 @@ const puppeteer = require('puppeteer');
 const s3 = require('@auth0/s3');
 const EventEmitter = require('events');
 
-const stubPuppeteer = (sinon, success = true, notFound = false) => {
+const stubPuppeteer = (sinon, url, success = true, notFound = false) => {
+    const gotoStub = sinon.stub();
+    if (notFound) {
+        gotoStub.withArgs(url, { waitUntil: ['networkidle2', 'domcontentloaded'] }).throws(new Error('not found'));
+    } else {
+        gotoStub.withArgs(url, { waitUntil: ['networkidle2', 'domcontentloaded'] }).resolves(true);
+    }
+    gotoStub.throws('stub called with invalid arguments');
+
     sinon.stub(puppeteer, 'launch').returns(new Promise((resolve) => resolve({
         newPage() {
             return {
-                setViewport() { return true; },
-                goto() {
-                    if (notFound) {
-                        throw new Error('not found');
-                    }
+                setViewport() {
                     return true;
                 },
-                waitFor() { return true; },
-                emulateMedia() { return true; },
+                goto: gotoStub,
+                waitFor() {
+                    return true;
+                },
+                emulateMedia() {
+                    return true;
+                },
                 $() {
                     return {
                         screenshot() {
@@ -39,7 +48,9 @@ const stubPuppeteer = (sinon, success = true, notFound = false) => {
                 }
             };
         },
-        close() { return true; },
+        close() {
+            return true;
+        },
     })));
 };
 
@@ -47,7 +58,9 @@ const stubS3 = (sinon, url, success = true) => {
     sinon.stub(s3, 'createClient').returns({
         uploadFile() {
             const eventEmitter = new EventEmitter();
-            setTimeout(() => { eventEmitter.emit(success ? 'end' : 'error'); }, 500);
+            setTimeout(() => {
+                eventEmitter.emit(success ? 'end' : 'error');
+            }, 500);
             return eventEmitter;
         },
     });

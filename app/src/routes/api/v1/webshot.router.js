@@ -11,13 +11,14 @@ const UploadFileS3Error = require('errors/uploadFileS3.error');
 const WebshotURLError = require('errors/webshotURL.error');
 const WebshotNotFoundError = require('errors/webshotNotFound.error');
 const KoaSendError = require('errors/koaSend.error');
+const querystring = require('querystring');
 
 const router = new Router({
     prefix: '/webshot',
 });
 
 const viewportDefaultOptions = { width: 1024, height: 768, isMobile: true };
-const gotoOptions = { waitUntil: 'networkidle2' };
+const gotoOptions = { waitUntil: ['networkidle2', 'domcontentloaded'] };
 
 const getDelayParam = (param) => {
     const n = parseInt(param, 10);
@@ -25,7 +26,6 @@ const getDelayParam = (param) => {
     if (typeof n === 'number' && !isNaN(n)) return n;
     return param;
 };
-
 
 const VALID_FORMATS = ['pdf', 'png'];
 
@@ -115,6 +115,10 @@ class WebshotRouter {
 
     static async widgetThumbnail(ctx) {
         const { widget } = ctx.params;
+        const queryParamsClone = { ...ctx.query };
+        delete queryParamsClone.width;
+        delete queryParamsClone.height;
+
         logger.info(`Generating thumbnail for widget ${widget}`);
 
         // Validating URL
@@ -122,7 +126,7 @@ class WebshotRouter {
         const tmpDir = tmp.dirSync();
         const filename = `${widget}-${Date.now()}.png`;
         const filePath = `${tmpDir.name}/${filename}`;
-        const renderUrl = `${config.get('service.appUrl')}${widget}`;
+        const renderUrl = `${config.get('service.appUrl')}${widget}?${querystring.stringify(queryParamsClone)}`;
 
         if (ctx.query.width) viewportOptions.width = parseInt(ctx.query.width, 10);
         if (ctx.query.height) viewportOptions.height = parseInt(ctx.query.height, 10);
