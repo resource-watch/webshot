@@ -25,10 +25,28 @@ describe('POST widget/:widget/thumbnail', () => {
     beforeEach(() => { sinonSandbox = sinon.createSandbox(); });
 
     it('Takes a snapshot of the widget returning 200 OK with the URL for the screenshot (happy case)', async () => {
-        stubPuppeteer(sinonSandbox);
+        stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/123?');
         stubS3(sinonSandbox, 'http://www.example.com');
 
         const response = await requester.post(`/api/v1/webshot/widget/123/thumbnail`).send();
+        response.status.should.equal(200);
+        response.body.should.have.property('data').and.be.an('object');
+        response.body.data.should.have.property('widgetThumbnail').and.equal('http://www.example.com');
+    });
+
+    it('Takes a snapshot of the widget returning 200 OK with the URL for the screenshot - Query args are passed along, height and width are excluded', async () => {
+        stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/123?foo=bar');
+        stubS3(sinonSandbox, 'http://www.example.com');
+
+        const response = await requester
+            .post(`/api/v1/webshot/widget/123/thumbnail`)
+            .query({
+                foo: 'bar',
+                width: 300,
+                height: 300
+            })
+            .send();
+
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.an('object');
         response.body.data.should.have.property('widgetThumbnail').and.equal('http://www.example.com');
@@ -46,7 +64,7 @@ describe('POST widget/:widget/thumbnail', () => {
     });
 
     it('If uploading to S3 fails returns 500 Internal Server Error', async () => {
-        stubPuppeteer(sinonSandbox);
+        stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/123?');
         stubS3(sinonSandbox, 'http://www.example.com', false);
 
         const response = await requester.post(`/api/v1/webshot/widget/123/thumbnail`).send();

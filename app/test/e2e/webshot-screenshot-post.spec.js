@@ -24,7 +24,7 @@ describe('Screenshot endpoint', () => {
 
     describe('happy case', () => {
         it('Takes a screenshot of the widget returning 200 OK with the URL for the pdf', async () => {
-            stubPuppeteer(sinonSandbox);
+            stubPuppeteer(sinonSandbox, 'http://www.example.com');
             stubKoaSend(sinonSandbox, true);
 
             requester = await getTestServer();
@@ -35,7 +35,7 @@ describe('Screenshot endpoint', () => {
         });
 
         it('Takes a screenshot of the widget returning 200 OK with the URL for the png', async () => {
-            stubPuppeteer(sinonSandbox);
+            stubPuppeteer(sinonSandbox, 'http://www.example.com');
             stubKoaSend(sinonSandbox, true);
 
             requester = await getTestServer();
@@ -47,7 +47,7 @@ describe('Screenshot endpoint', () => {
     });
 
     it('If there is no URL, returns 400 indicating url param is required', async () => {
-        stubPuppeteer(sinonSandbox);
+        stubPuppeteer(sinonSandbox, 'http://www.example.com');
         stubKoaSend(sinonSandbox, true);
 
         requester = await getTestServer();
@@ -99,12 +99,18 @@ describe('Screenshot endpoint', () => {
     });
 
     it('If url query param does not exist, returns 404 HTTP error code', async () => {
-        stubPuppeteer(sinonSandbox, true, true);
+        stubPuppeteer(sinonSandbox, 'http://www.example.com', true, true);
         stubKoaSend(sinonSandbox, true);
 
         requester = await getTestServer();
 
-        const response = await requester.get(`/api/v1/webshot?url=http://www.example.com&filename=newname`).send();
+        const response = await requester
+            .get(`/api/v1/webshot`)
+            .query({
+                url: 'http://www.example.com',
+                filename: 'newname'
+            })
+            .send();
         response.status.should.equal(404);
     });
 
