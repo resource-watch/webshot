@@ -1,3 +1,7 @@
+## 20/09/2021
+
+- Modify S3 widget thumbnail urls to use HTTPS
+
 ## 09/09/2021
 
 - Pass along query parameters to rendering URL when generating widget thumbnails.

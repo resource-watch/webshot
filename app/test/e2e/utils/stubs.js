@@ -65,7 +65,7 @@ const stubS3 = (sinon, url, success = true) => {
         },
     });
 
-    sinon.stub(s3, 'getPublicUrlHttp').returns(url);
+    sinon.stub(s3, 'getPublicUrl').returns(url);
 };
 
 const stubKoaSend = (sinon, success = true) => {

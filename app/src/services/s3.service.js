@@ -46,7 +46,7 @@ class S3Service {
                 reject(err);
             });
         });
-        const s3file = s3.getPublicUrlHttp(params.s3Params.Bucket, params.s3Params.Key);
+        const s3file = s3.getPublicUrl(params.s3Params.Bucket, params.s3Params.Key);
         return s3file;
     }
 
