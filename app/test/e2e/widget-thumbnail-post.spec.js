@@ -22,7 +22,9 @@ describe('POST widget/:widget/thumbnail', () => {
         requester = await getTestServer();
     });
 
-    beforeEach(() => { sinonSandbox = sinon.createSandbox(); });
+    beforeEach(() => {
+        sinonSandbox = sinon.createSandbox();
+    });
 
     it('Takes a snapshot of the widget returning 200 OK with the URL for the screenshot (happy case)', async () => {
         stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/123?');

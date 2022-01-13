@@ -20,7 +20,9 @@ describe('Screenshot endpoint', () => {
         }
     });
 
-    beforeEach(() => { sinonSandbox = sinon.createSandbox(); });
+    beforeEach(() => {
+        sinonSandbox = sinon.createSandbox();
+    });
 
     describe('happy case', () => {
         it('Takes a screenshot of the widget returning 200 OK with the URL for the pdf', async () => {
