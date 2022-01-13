@@ -46,7 +46,7 @@ describe('POST layer/:layer/thumbnail', () => {
     });
 
     it('If uploading to S3 fails returns 500 Internal Server Error', async () => {
-        stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/layer/123');
+        stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/layer/123?');
         stubS3(sinonSandbox, 'http://www.example.com', false);
 
         const response = await requester.post(`/api/v1/webshot/layer/123/thumbnail`).send();
