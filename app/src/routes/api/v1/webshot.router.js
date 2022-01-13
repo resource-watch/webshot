@@ -173,9 +173,62 @@ class WebshotRouter {
         }
     }
 
+    static async layerThumbnail(ctx) {
+        const { layer } = ctx.params;
+
+        logger.info(`Generating thumbnail for layer ${layer}`);
+
+        // Validating URL
+        const viewportOptions = { ...viewportDefaultOptions };
+        const tmpDir = tmp.dirSync();
+        const filename = `${layer}-${Date.now()}.png`;
+        const filePath = `${tmpDir.name}/${filename}`;
+        const searchParams = new URLSearchParams(ctx.query);
+        const renderUrl = `${config.get('service.appUrl')}layer/${layer}?${searchParams.toString()}`;
+
+        logger.info(`Capturing URL: ${renderUrl}`);
+
+        try {
+            logger.debug(`Saving in: ${filePath}`);
+
+            // Using Puppeteer
+            await puppeteer.launch({ args: ['--no-sandbox'] }).then(async (browser) => {
+
+                try {
+                    const page = await browser.newPage();
+
+                    await page.setViewport(viewportOptions);
+                    await page.goto(renderUrl, { waitUntil: ['networkidle2', 'domcontentloaded'] });
+
+                    // eslint-disable-next-line no-undef
+                    await page.waitFor(() => window.WEBSHOT_READY, { timeout: 30000 });
+
+                    const element = await page.$('#webshot-content');
+                    await element.screenshot({ path: filePath });
+                } catch (error) {
+                    throw new WebshotURLError(`Error taking screenshot on URL ${renderUrl} for layer ${layer}: ${error}`);
+                }
+
+                try {
+                    logger.debug(`Uploading ${filePath} to S3`);
+                    const s3file = await S3Service.uploadFileToS3(filePath, filename);
+                    ctx.body = { data: { layerThumbnail: s3file } };
+                } catch (error) {
+                    throw new UploadFileS3Error(`Error uploading screenshot to S3 for layer ${layer}: ${error}`);
+                }
+
+                browser.close();
+            });
+        } catch (err) {
+            logger.error(err);
+            throw err;
+        }
+    }
+
 }
 
 router.get('/', WebshotRouter.screenshot);
+router.post('/layer/:layer/thumbnail', WebshotRouter.layerThumbnail);
 router.post('/widget/:widget/thumbnail', WebshotRouter.widgetThumbnail);
 
 module.exports = router;
