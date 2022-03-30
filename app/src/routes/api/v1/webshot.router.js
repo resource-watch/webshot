@@ -19,6 +19,7 @@ const router = new Router({
 
 const viewportDefaultOptions = { width: 1024, height: 768, isMobile: true };
 const gotoOptions = { waitUntil: ['networkidle2', 'domcontentloaded'] };
+const browserArgs = ['--no-sandbox', '--single-process', '--no-first-run'];
 
 const getDelayParam = (param) => {
     const n = parseInt(param, 10);
@@ -71,7 +72,7 @@ class WebshotRouter {
             logger.debug(`Saving in: ${filePath}`);
 
             // Using Puppeteer
-            browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+            browser = await puppeteer.launch({ args: browserArgs });
             const page = await browser.newPage();
             await page.setViewport(viewportOptions);
             await page.goto(ctx.query.url, gotoOptions);
@@ -137,7 +138,7 @@ class WebshotRouter {
             logger.debug(`Saving in: ${filePath}`);
 
             // Using Puppeteer
-            await puppeteer.launch({ args: ['--no-sandbox'] }).then(async (browser) => {
+            await puppeteer.launch({ args: browserArgs }).then(async (browser) => {
 
                 try {
                     const page = await browser.newPage();
@@ -192,7 +193,7 @@ class WebshotRouter {
             logger.debug(`Saving in: ${filePath}`);
 
             // Using Puppeteer
-            await puppeteer.launch({ args: ['--no-sandbox'] }).then(async (browser) => {
+            await puppeteer.launch({ args: browserArgs }).then(async (browser) => {
 
                 try {
                     const page = await browser.newPage();
