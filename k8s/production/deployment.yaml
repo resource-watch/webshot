@@ -34,98 +34,108 @@ spec:
                     values:
                       - apps
       containers:
-      - args:
-        - start
-        env:
-        - name: PORT
-          value: "5000"
-        - name: NODE_ENV
-          value: prod
-        - name: NODE_PATH
-          value: app/src
-        - name: LOCAL_URL
-          value: http://webshot.default.svc.cluster.local:5000
-        - name: WIDGET_RENDER_URL
-          value: https://resourcewatch.org/webshot/
-        - name: GATEWAY_URL
-          valueFrom:
-            secretKeyRef:
-              key: GATEWAY_URL
-              name: mssecrets
-        - name: MICROSERVICE_TOKEN
-          valueFrom:
-            secretKeyRef:
-              key: MICROSERVICE_TOKEN
-              name: mssecrets
-        - name: S3_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              key: S3_ACCESS_KEY_ID
-              name: mssecrets
-        - name: S3_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              key: S3_SECRET_ACCESS_KEY
-              name: mssecrets
-        - name: FASTLY_ENABLED
-          valueFrom:
-            secretKeyRef:
-              key: FASTLY_ENABLED
-              name: mssecrets
-        - name: FASTLY_APIKEY
-          valueFrom:
-            secretKeyRef:
-              key: FASTLY_APIKEY
-              name: mssecrets
-              optional: true
-        - name: FASTLY_SERVICEID
-          valueFrom:
-            secretKeyRef:
-              key: FASTLY_SERVICEID
-              name: mssecrets
-              optional: true
-        image: gfwdockerhub/webshot
-        imagePullPolicy: Always
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthcheck
-            port: 5000
-            scheme: HTTP
-          initialDelaySeconds: 30
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 5
-        name: webshot
-        ports:
-        - containerPort: 5000
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthcheck
-            port: 5000
-            scheme: HTTP
-          initialDelaySeconds: 30
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 5
-        resources:
-          limits:
-            cpu: "1"
-            memory: 512M
-          requests:
-            cpu: 250m
-            memory: 256M
-        securityContext:
-          privileged: true
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
+        - args:
+            - start
+          env:
+            - name: PORT
+              value: "5000"
+            - name: NODE_ENV
+              value: prod
+            - name: NODE_PATH
+              value: app/src
+            - name: LOCAL_URL
+              value: http://webshot.default.svc.cluster.local:5000
+            - name: WIDGET_RENDER_URL
+              value: https://resourcewatch.org/webshot/
+            - name: GATEWAY_URL
+              valueFrom:
+                secretKeyRef:
+                  key: GATEWAY_URL
+                  name: mssecrets
+            - name: MICROSERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: MICROSERVICE_TOKEN
+                  name: mssecrets
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: S3_ACCESS_KEY_ID
+                  name: mssecrets
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: S3_SECRET_ACCESS_KEY
+                  name: mssecrets
+            - name: FASTLY_ENABLED
+              valueFrom:
+                secretKeyRef:
+                  key: FASTLY_ENABLED
+                  name: mssecrets
+            - name: FASTLY_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: FASTLY_APIKEY
+                  name: mssecrets
+                  optional: true
+            - name: FASTLY_SERVICEID
+              valueFrom:
+                secretKeyRef:
+                  key: FASTLY_SERVICEID
+                  name: mssecrets
+                  optional: true
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_REGION
+                  name: mssecrets
+            - name: AWS_API_KEY_USAGE_PLAN_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_API_KEY_USAGE_PLAN_ID
+                  name: mssecrets
+          image: gfwdockerhub/webshot
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: webshot
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512M
+            requests:
+              cpu: 250m
+              memory: 256M
+          securityContext:
+            privileged: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       imagePullSecrets:
         - name: regcred
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
+      securityContext: { }
       terminationGracePeriodSeconds: 30
-status: {}
+status: { }

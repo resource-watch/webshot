@@ -1,4 +1,4 @@
-FROM node:12
+FROM node:20.4-bullseye
 MAINTAINER info@vizzuality.com
 
 ENV USER webshot-service

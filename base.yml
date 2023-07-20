@@ -1,8 +1,0 @@
-base:
-  build: .
-  ports:
-    - "5000:5000"
-  container_name: webshot
-  environment:
-    PORT: 5000
-    NODE_PATH: app/src

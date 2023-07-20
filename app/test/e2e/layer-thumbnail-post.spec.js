@@ -3,7 +3,8 @@ const nock = require('nock');
 const sinon = require('sinon');
 
 const { getTestServer } = require('./utils/test-server');
-const { stubPuppeteer, stubS3 } = require('./utils/stubs');
+const { stubPuppeteer, stubS3 } = require('./utils/helpers');
+const { mockValidateRequestWithApiKey } = require('./utils/helpers');
 
 chai.should();
 
@@ -27,20 +28,30 @@ describe('POST layer/:layer/thumbnail', () => {
     });
 
     it('Takes a snapshot of the layer returning 200 OK with the URL for the screenshot (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/layer/123?');
         stubS3(sinonSandbox, 'http://www.example.com');
 
-        const response = await requester.post(`/api/v1/webshot/layer/123/thumbnail`).send();
+        const response = await requester
+            .post(`/api/v1/webshot/layer/123/thumbnail`)
+            .set('x-api-key', 'api-key-test')
+            .send();
+
         response.status.should.equal(200);
         response.body.should.have.property('data').and.be.an('object');
         response.body.data.should.have.property('layerThumbnail').and.equal('http://www.example.com');
     });
 
     it('If puppeteer fails taking the screenshot returns 400 Internal Server Error', async () => {
+        mockValidateRequestWithApiKey({});
         stubPuppeteer(sinonSandbox, false);
         stubS3(sinonSandbox, 'http://www.example.com');
 
-        const response = await requester.post(`/api/v1/webshot/layer/123/thumbnail`).send();
+        const response = await requester
+            .post(`/api/v1/webshot/layer/123/thumbnail`)
+            .set('x-api-key', 'api-key-test')
+            .send();
+
         response.status.should.equal(400);
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('status').and.equal(400);
@@ -48,10 +59,15 @@ describe('POST layer/:layer/thumbnail', () => {
     });
 
     it('If uploading to S3 fails returns 500 Internal Server Error', async () => {
+        mockValidateRequestWithApiKey({});
         stubPuppeteer(sinonSandbox, 'https://resourcewatch.org/webshot/layer/123?');
         stubS3(sinonSandbox, 'http://www.example.com', false);
 
-        const response = await requester.post(`/api/v1/webshot/layer/123/thumbnail`).send();
+        const response = await requester
+            .post(`/api/v1/webshot/layer/123/thumbnail`)
+            .set('x-api-key', 'api-key-test')
+            .send();
+
         response.status.should.equal(500);
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('status').and.equal(500);
