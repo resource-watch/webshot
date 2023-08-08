@@ -66,7 +66,7 @@
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "rimraf": "^2.6.1",
-    "rw-api-microservice-node": "^5.0.0-rc.6",
+    "rw-api-microservice-node": "^5.1.1",
     "tmp": "0.0.33",
     "url": "^0.11.0"
   },
